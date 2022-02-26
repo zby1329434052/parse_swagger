@@ -19,6 +19,9 @@ public class HttpResponse extends Response {
     @JSONField(ordinal = 1)
     private List<KeyValue> headers;
     @JSONField(ordinal = 2)
+    /**
+     * 返回状态码 k,v list kv都为code
+     */
     private List<KeyValue> statusCode;
     @JSONField(ordinal = 3)
     private Body body;

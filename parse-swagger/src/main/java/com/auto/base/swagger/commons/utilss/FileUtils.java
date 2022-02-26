@@ -1,10 +1,8 @@
 package com.auto.base.swagger.commons.utilss;
 
-import io.metersphere.api.dto.scenario.request.BodyFile;
-import io.metersphere.base.domain.JarConfig;
-import io.metersphere.commons.exception.MSException;
-import io.metersphere.i18n.Translator;
-import io.metersphere.service.JarConfigService;
+import com.auto.base.swagger.commons.exception.MSException;
+import com.auto.base.swagger.dto.BodyFile;
+import com.auto.base.swagger.i18n.Translator;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.CSVDataSet;
@@ -23,7 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -84,29 +81,29 @@ public class FileUtils {
         }
     }
 
-    public static String create(String id, MultipartFile item) {
-        String filePath = BODY_FILE_DIR + "/plugin";
-        if (item != null) {
-            File testDir = new File(filePath);
-            if (!testDir.exists()) {
-                testDir.mkdirs();
-            }
-            File file = new File(filePath + "/" + id + "_" + item.getOriginalFilename());
-            try (InputStream in = item.getInputStream(); OutputStream out = new FileOutputStream(file)) {
-                file.createNewFile();
-                final int MAX = 4096;
-                byte[] buf = new byte[MAX];
-                for (int bytesRead = in.read(buf, 0, MAX); bytesRead != -1; bytesRead = in.read(buf, 0, MAX)) {
-                    out.write(buf, 0, bytesRead);
-                }
-            } catch (IOException e) {
-                LogUtil.error(e);
-                MSException.throwException(Translator.get("upload_fail"));
-            }
-            return file.getPath();
-        }
-        return null;
-    }
+//    public static String create(String id, MultipartFile item) {
+//        String filePath = BODY_FILE_DIR + "/plugin";
+//        if (item != null) {
+//            File testDir = new File(filePath);
+//            if (!testDir.exists()) {
+//                testDir.mkdirs();
+//            }
+//            File file = new File(filePath + "/" + id + "_" + item.getOriginalFilename());
+//            try (InputStream in = item.getInputStream(); OutputStream out = new FileOutputStream(file)) {
+//                file.createNewFile();
+//                final int MAX = 4096;
+//                byte[] buf = new byte[MAX];
+//                for (int bytesRead = in.read(buf, 0, MAX); bytesRead != -1; bytesRead = in.read(buf, 0, MAX)) {
+//                    out.write(buf, 0, bytesRead);
+//                }
+//            } catch (IOException e) {
+//                LogUtil.error(e);
+//                MSException.throwException(Translator.get("upload_fail"));
+//            }
+//            return file.getPath();
+//        }
+//        return null;
+//    }
 
     public static void createBodyFiles(String requestId, List<MultipartFile> bodyFiles) {
         if (CollectionUtils.isNotEmpty(bodyFiles) && StringUtils.isNotBlank(requestId)) {
@@ -140,19 +137,19 @@ public class FileUtils {
 
     public static void copyBdyFile(String originId, String toId) {
         try {
-            FileUtil.copyDir(new File(io.metersphere.commons.utils.FileUtils.BODY_FILE_DIR + "/" + originId),
-                    new File(io.metersphere.commons.utils.FileUtils.BODY_FILE_DIR + "/" + toId));
+            FileUtil.copyDir(new File(FileUtils.BODY_FILE_DIR + "/" + originId),
+                    new File(FileUtils.BODY_FILE_DIR + "/" + toId));
         } catch (Exception e) {
             LogUtil.error(e.getMessage(), e);
         }
     }
 
     public static void createBodyFiles(List<String> bodyUploadIds, List<MultipartFile> bodyFiles) {
-        io.metersphere.commons.utils.FileUtils.create(bodyUploadIds, bodyFiles, null);
+        FileUtils.create(bodyUploadIds, bodyFiles, null);
     }
 
     public static void createFiles(List<String> bodyUploadIds, List<MultipartFile> bodyFiles, String path) {
-        io.metersphere.commons.utils.FileUtils.create(bodyUploadIds, bodyFiles, path);
+        FileUtils.create(bodyUploadIds, bodyFiles, path);
     }
 
     public static String createFile(MultipartFile bodyFile) {
@@ -260,72 +257,72 @@ public class FileUtils {
         return buffer;
     }
 
-    public List<Object> getZipJar() {
-        List<Object> jarFiles = new LinkedList<>();
-        // jar 包
-        JarConfigService jarConfigService = io.metersphere.commons.utils.CommonBeanFactory.getBean(JarConfigService.class);
-        List<JarConfig> jars = jarConfigService.list();
-        List<File> files = new ArrayList<>();
+//    public List<Object> getZipJar() {
+//        List<Object> jarFiles = new LinkedList<>();
+//        // jar 包
+//        JarConfigService jarConfigService = CommonBeanFactory.getBean(JarConfigService.class);
+//        List<JarConfig> jars = jarConfigService.list();
+//        List<File> files = new ArrayList<>();
+//
+//        jars.forEach(jarConfig -> {
+//            String path = jarConfig.getPath();
+//            File file = new File(path);
+//            if (file.isDirectory() && !path.endsWith("/")) {
+//                file = new File(path + "/");
+//            }
+//            files.add(file);
+//        });
+//
+//        try {
+//            File file = CompressUtils.zipFiles(UUID.randomUUID().toString() + ".zip", files);
+//            FileSystemResource resource = new FileSystemResource(file);
+//            byte[] fileByte = this.fileToByte(file);
+//            if (fileByte != null) {
+//                ByteArrayResource byteArrayResource = new ByteArrayResource(fileByte) {
+//                    @Override
+//                    public String getFilename() throws IllegalStateException {
+//                        return resource.getFilename();
+//                    }
+//                };
+//                jarFiles.add(byteArrayResource);
+//            }
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//
+//        return jarFiles;
+//    }
 
-        jars.forEach(jarConfig -> {
-            String path = jarConfig.getPath();
-            File file = new File(path);
-            if (file.isDirectory() && !path.endsWith("/")) {
-                file = new File(path + "/");
-            }
-            files.add(file);
-        });
-
-        try {
-            File file = CompressUtils.zipFiles(UUID.randomUUID().toString() + ".zip", files);
-            FileSystemResource resource = new FileSystemResource(file);
-            byte[] fileByte = this.fileToByte(file);
-            if (fileByte != null) {
-                ByteArrayResource byteArrayResource = new ByteArrayResource(fileByte) {
-                    @Override
-                    public String getFilename() throws IllegalStateException {
-                        return resource.getFilename();
-                    }
-                };
-                jarFiles.add(byteArrayResource);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return jarFiles;
-    }
-
-    public List<Object> getJar() {
-        List<Object> jarFiles = new LinkedList<>();
-        // jar 包
-        JarConfigService jarConfigService = io.metersphere.commons.utils.CommonBeanFactory.getBean(JarConfigService.class);
-        List<JarConfig> jars = jarConfigService.list();
-        jars.forEach(jarConfig -> {
-            try {
-                String path = jarConfig.getPath();
-                File file = new File(path);
-                if (file.isDirectory() && !path.endsWith("/")) {
-                    file = new File(path + "/");
-                }
-                FileSystemResource resource = new FileSystemResource(file);
-                byte[] fileByte = this.fileToByte(file);
-                if (fileByte != null) {
-                    ByteArrayResource byteArrayResource = new ByteArrayResource(fileByte) {
-                        @Override
-                        public String getFilename() throws IllegalStateException {
-                            return resource.getFilename();
-                        }
-                    };
-                    jarFiles.add(byteArrayResource);
-                }
-
-            } catch (Exception e) {
-                LogUtil.error(e.getMessage(), e);
-            }
-        });
-        return jarFiles;
-    }
+//    public List<Object> getJar() {
+//        List<Object> jarFiles = new LinkedList<>();
+//        // jar 包
+//        JarConfigService jarConfigService = CommonBeanFactory.getBean(JarConfigService.class);
+//        List<JarConfig> jars = jarConfigService.list();
+//        jars.forEach(jarConfig -> {
+//            try {
+//                String path = jarConfig.getPath();
+//                File file = new File(path);
+//                if (file.isDirectory() && !path.endsWith("/")) {
+//                    file = new File(path + "/");
+//                }
+//                FileSystemResource resource = new FileSystemResource(file);
+//                byte[] fileByte = this.fileToByte(file);
+//                if (fileByte != null) {
+//                    ByteArrayResource byteArrayResource = new ByteArrayResource(fileByte) {
+//                        @Override
+//                        public String getFilename() throws IllegalStateException {
+//                            return resource.getFilename();
+//                        }
+//                    };
+//                    jarFiles.add(byteArrayResource);
+//                }
+//
+//            } catch (Exception e) {
+//                LogUtil.error(e.getMessage(), e);
+//            }
+//        });
+//        return jarFiles;
+//    }
 
     public List<Object> getMultipartFiles(HashTree hashTree) {
         List<Object> multipartFiles = new LinkedList<>();

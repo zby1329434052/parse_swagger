@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 public class Body {
     private String type;
+    //请求体/响应体  响应体时解析swagger返回参数类型转为json
     private String raw;
     private String format;
     private List<KeyValue> kvs;

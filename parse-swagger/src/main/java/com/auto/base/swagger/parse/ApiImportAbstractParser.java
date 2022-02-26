@@ -1,16 +1,12 @@
 package com.auto.base.swagger.parse;
 
-import com.alibaba.fastjson.JSON;
 import com.auto.base.swagger.commons.exception.MSException;
 import com.auto.base.swagger.commons.utilss.LogUtil;
 import com.auto.base.swagger.domain.ApiDefinitionWithBLOBs;
 import com.auto.base.swagger.dto.Body;
 import com.auto.base.swagger.dto.KeyValue;
-import com.auto.base.swagger.dto.Scenario;
 import com.auto.base.swagger.request.MsHTTPSamplerProxy;
 import com.auto.base.swagger.request.RequestType;
-import org.apache.catalina.manager.util.SessionUtils;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -52,11 +48,11 @@ public abstract class ApiImportAbstractParser<T> implements ApiImportParser<T> {
         return testStr.toString();
     }
 
-    protected void setScenarioByRequest(Scenario scenario, ApiTestImportRequest request) {
-        if (request.getUseEnvironment()) {
-            scenario.setEnvironmentId(request.getEnvironmentId());
-        }
-    }
+//    protected void setScenarioByRequest(Scenario scenario, ApiTestImportRequest request) {
+//        if (request.getUseEnvironment()) {
+//            scenario.setEnvironmentId(request.getEnvironmentId());
+//        }
+//    }
 
     protected String getBodyType(String contentType) {
         String bodyType = "";
@@ -105,10 +101,13 @@ public abstract class ApiImportAbstractParser<T> implements ApiImportParser<T> {
             }
             List<KeyValue> headers = request.getHeaders();
             if (headers == null) {
+                //如果没有请求头参数就设置为空集合
                 headers = new ArrayList<>();
                 request.setHeaders(headers);
             }
+            //如果为row或者formdata格式就不在请求头里设置Content-Type 待确认。
             if (StringUtils.isNotEmpty(contentType)) {
+                //判断是否请求头含有Content-Type 没有则在请求头集合中添加 请求体的类型
                 addContentType(request.getHeaders(), contentType);
             }
         }
@@ -126,8 +125,8 @@ public abstract class ApiImportAbstractParser<T> implements ApiImportParser<T> {
             apiDefinition.setUserId(importRequest.getUserId());
             apiDefinition.setCreateUser(importRequest.getUserId());
         } else {
-            apiDefinition.setUserId(SessionUtils.getUserId());
-            apiDefinition.setCreateUser(SessionUtils.getUserId());
+            apiDefinition.setUserId("");
+            apiDefinition.setCreateUser("");
         }
         return apiDefinition;
     }
@@ -147,18 +146,22 @@ public abstract class ApiImportAbstractParser<T> implements ApiImportParser<T> {
     }
 
     protected MsHTTPSamplerProxy buildRequest(String name, String path, String method) {
+        //method 请求方法
         MsHTTPSamplerProxy request = new MsHTTPSamplerProxy();
         request.setName(name);
         // 路径去掉域名/IP 地址，保留方法名称及参数
         request.setPath(formatPath(path));
         request.setMethod(method);
         request.setProtocol(RequestType.HTTP);
+        //请求id
         request.setId(UUID.randomUUID().toString());
         request.setHeaders(new ArrayList<>());
         request.setArguments(new ArrayList<>());
         request.setRest(new ArrayList<>());
         Body body = new Body();
+        //初始化集合
         body.initKvs();
+        //初始化集合
         body.initBinary();
         request.setBody(body);
         return request;
@@ -202,15 +205,15 @@ public abstract class ApiImportAbstractParser<T> implements ApiImportParser<T> {
         }
     }
 
-    protected ApiScenarioWithBLOBs parseScenario(MsScenario msScenario) {
-        ApiScenarioWithBLOBs scenarioWithBLOBs = new ApiScenarioWithBLOBs();
-        scenarioWithBLOBs.setName(msScenario.getName());
-        scenarioWithBLOBs.setProjectId(this.projectId);
-        if (msScenario != null && CollectionUtils.isNotEmpty(msScenario.getHashTree())) {
-            scenarioWithBLOBs.setStepTotal(msScenario.getHashTree().size());
-        }
-        scenarioWithBLOBs.setId(UUID.randomUUID().toString());
-        scenarioWithBLOBs.setScenarioDefinition(JSON.toJSONString(msScenario));
-        return scenarioWithBLOBs;
-    }
+//    protected ApiScenarioWithBLOBs parseScenario(MsScenario msScenario) {
+//        ApiScenarioWithBLOBs scenarioWithBLOBs = new ApiScenarioWithBLOBs();
+//        scenarioWithBLOBs.setName(msScenario.getName());
+//        scenarioWithBLOBs.setProjectId(this.projectId);
+//        if (msScenario != null && CollectionUtils.isNotEmpty(msScenario.getHashTree())) {
+//            scenarioWithBLOBs.setStepTotal(msScenario.getHashTree().size());
+//        }
+//        scenarioWithBLOBs.setId(UUID.randomUUID().toString());
+//        scenarioWithBLOBs.setScenarioDefinition(JSON.toJSONString(msScenario));
+//        return scenarioWithBLOBs;
+//    }
 }
