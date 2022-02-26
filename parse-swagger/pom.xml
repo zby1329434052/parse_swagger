@@ -128,6 +128,11 @@
             <artifactId>aspectjtools</artifactId>
             <version>1.9.7</version>
         </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20171018</version>
+        </dependency>
 
     </dependencies>
 
