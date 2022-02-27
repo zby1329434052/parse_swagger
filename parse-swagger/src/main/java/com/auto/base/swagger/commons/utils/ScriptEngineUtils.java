@@ -1,4 +1,4 @@
-package com.auto.base.swagger.commons.utilss;
+package com.auto.base.swagger.commons.utils;
 
 import io.metersphere.jmeter.functions.MockFunction;
 import org.apache.commons.io.IOUtils;

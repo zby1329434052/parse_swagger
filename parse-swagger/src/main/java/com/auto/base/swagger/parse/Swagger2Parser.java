@@ -4,14 +4,19 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.auto.base.swagger.commons.constants.SwaggerParameterType;
+import com.auto.base.swagger.commons.utils.BeanUtils;
 import com.auto.base.swagger.domain.ApiDefinitionWithBLOBs;
 import com.auto.base.swagger.dto.Body;
 import com.auto.base.swagger.dto.KeyValue;
+import com.auto.base.swagger.parse.swagger.SwaggerApi;
+import com.auto.base.swagger.parse.swagger.SwaggerInfo;
+import com.auto.base.swagger.parse.swagger.SwaggerTag;
 import com.auto.base.swagger.request.MsHTTPSamplerProxy;
 import com.auto.base.swagger.request.RequestType;
 import com.auto.base.swagger.response.HttpResponse;
 import io.swagger.models.ArrayModel;
 import io.swagger.models.HttpMethod;
+import io.swagger.models.Info;
 import io.swagger.models.Model;
 import io.swagger.models.ModelImpl;
 import io.swagger.models.Operation;
@@ -48,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Swagger2Parser extends SwaggerAbstractParser {
 
@@ -73,7 +79,33 @@ public class Swagger2Parser extends SwaggerAbstractParser {
         ApiDefinitionImport definitionImport = new ApiDefinitionImport();
         this.projectId = request.getProjectId();
         definitionImport.setData(parseRequests(swagger, request));
+        definitionImport.setSwaggerApi(parseSwaggerApi(swagger));
         return definitionImport;
+    }
+
+    private SwaggerApi parseSwaggerApi(Swagger swagger) {
+        SwaggerApi swaggerApi = new SwaggerApi();
+        swaggerApi.setSwagger(swagger.getSwagger());
+        swaggerApi.setInfo(parseSwaggerInfo(swagger.getInfo()));
+        swaggerApi.setHost(swagger.getHost());
+        swaggerApi.setBasePath(swagger.getBasePath());
+        if (swagger.getSchemes() != null) {
+            swaggerApi.setSchemes(swagger.getSchemes().stream().map(scheme -> scheme.toValue()).collect(Collectors.toList()));
+        }
+        swaggerApi.setTags(swagger.getTags().stream().map(tag -> {
+            SwaggerTag swaggerTag = new SwaggerTag();
+            BeanUtils.copyBean(swaggerTag, tag);
+            return swaggerTag;
+        }).collect(Collectors.toList()));
+        swaggerApi.setPaths(JSON.parseObject(JSON.toJSONString(swagger.getPaths())));
+        swaggerApi.setDefinitions(JSON.parseObject(JSON.toJSONString(swagger.getDefinitions())));
+        return swaggerApi;
+    }
+
+    private SwaggerInfo parseSwaggerInfo(Info info) {
+        SwaggerInfo swaggerInfo = new SwaggerInfo();
+        BeanUtils.copyBean(swaggerInfo, info);
+        return swaggerInfo;
     }
 
     private List<ApiDefinitionWithBLOBs> parseRequests(Swagger swagger, ApiTestImportRequest importRequest) {

@@ -1,4 +1,4 @@
-package com.auto.base.swagger.commons.utilss;
+package com.auto.base.swagger.commons.utils;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;

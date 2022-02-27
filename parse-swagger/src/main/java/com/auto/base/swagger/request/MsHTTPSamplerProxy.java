@@ -2,7 +2,7 @@ package com.auto.base.swagger.request;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import com.alibaba.fastjson.annotation.JSONType;
-import com.auto.base.swagger.commons.utilss.ScriptEngineUtils;
+import com.auto.base.swagger.commons.utils.ScriptEngineUtils;
 import com.auto.base.swagger.dto.Body;
 import com.auto.base.swagger.dto.KeyValue;
 import lombok.Data;

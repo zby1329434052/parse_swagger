@@ -1,4 +1,4 @@
-package com.auto.base.swagger.commons.utilss;
+package com.auto.base.swagger.commons.utils;
 
 import com.auto.base.swagger.commons.exception.MSException;
 import com.auto.base.swagger.dto.BodyFile;

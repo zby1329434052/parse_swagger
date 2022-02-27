@@ -1,4 +1,4 @@
-package com.auto.base.swagger.commons.utilss;
+package com.auto.base.swagger.commons.utils;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeansException;

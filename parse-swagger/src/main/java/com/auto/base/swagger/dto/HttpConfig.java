@@ -3,7 +3,7 @@ package com.auto.base.swagger.dto;
 import lombok.Data;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import com.auto.base.swagger.commons.utilss.BeanUtils;
+import com.auto.base.swagger.commons.utils.BeanUtils;
 
 
 import java.util.List;

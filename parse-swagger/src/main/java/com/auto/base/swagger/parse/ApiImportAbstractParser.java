@@ -1,7 +1,7 @@
 package com.auto.base.swagger.parse;
 
 import com.auto.base.swagger.commons.exception.MSException;
-import com.auto.base.swagger.commons.utilss.LogUtil;
+import com.auto.base.swagger.commons.utils.LogUtil;
 import com.auto.base.swagger.domain.ApiDefinitionWithBLOBs;
 import com.auto.base.swagger.dto.Body;
 import com.auto.base.swagger.dto.KeyValue;

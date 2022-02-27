@@ -1,4 +1,4 @@
-package com.auto.base.swagger.commons.utilss;
+package com.auto.base.swagger.commons.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

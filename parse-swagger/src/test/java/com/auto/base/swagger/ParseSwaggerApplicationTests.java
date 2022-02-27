@@ -7,7 +7,6 @@ import com.auto.base.swagger.parse.ApiDefinitionImport;
 import com.auto.base.swagger.parse.ApiTestImportRequest;
 import com.auto.base.swagger.parse.Swagger2Parser;
 import com.auto.base.swagger.request.MsHTTPSamplerProxy;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
@@ -25,9 +24,7 @@ class ParseSwaggerApplicationTests {
         apiTestImportRequest.setType("schedule");
         apiTestImportRequest.setUserId("user1");
 
-        ObjectMapper mapper = new ObjectMapper();
         MsHTTPSamplerProxy proxy;
-
         Map<String, String> returnMap;
 
 
@@ -40,8 +37,6 @@ class ParseSwaggerApplicationTests {
             proxy = JSONObject.parseObject(item.getRequest(), MsHTTPSamplerProxy.class);
             returnMap = MockApiUtils.getApiResponse(item.getResponse());
 
-
-            System.out.println("end");
         }
     }
 }
