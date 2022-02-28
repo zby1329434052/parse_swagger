@@ -113,8 +113,9 @@ public abstract class ApiImportAbstractParser<T> implements ApiImportParser<T> {
         }
     }
 
-    protected ApiDefinitionWithBLOBs buildApiDefinition(String id, String name, String path, String method, ApiTestImportRequest importRequest) {
+    protected ApiDefinitionWithBLOBs buildApiDefinition(String id, String tagName, String name, String path, String method, ApiTestImportRequest importRequest) {
         ApiDefinitionWithBLOBs apiDefinition = new ApiDefinitionWithBLOBs();
+        apiDefinition.setTags(tagName);
         apiDefinition.setName(name);
         apiDefinition.setPath(formatPath(path));
         apiDefinition.setProtocol(RequestType.HTTP);

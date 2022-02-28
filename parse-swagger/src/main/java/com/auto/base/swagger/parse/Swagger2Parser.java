@@ -171,7 +171,8 @@ public class Swagger2Parser extends SwaggerAbstractParser {
         } else {
             name = path;
         }
-        return buildApiDefinition(id, name, path, method,importRequest);
+        String tagName = operation.getTags().get(0);
+        return buildApiDefinition(id, tagName, name, path, method,importRequest);
     }
 
     /**

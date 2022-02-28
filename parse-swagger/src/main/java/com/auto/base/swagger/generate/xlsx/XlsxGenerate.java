@@ -18,7 +18,7 @@ public class XlsxGenerate extends XlsExcel implements ExcelGenerate {
     }
 
     @Override
-    public Workbook GenerateSheet() {
+    public Workbook GenerateSheet(Workbook workbook) {
         return null;
     }
 }

@@ -91,10 +91,12 @@ class XlsGenerateTest {
         excelMata.getSetMata().add(setMata);
         excelMata.getSetMata().add(setMata2);
 
-        Workbook sheets = new XlsGenerate().GenerateMata(excelMata);
+        XlsGenerate xlsGenerate = new XlsGenerate();
+        Workbook workbook = xlsGenerate.GenerateMata(excelMata);
+        Workbook workbook2 = xlsGenerate.GenerateSheet(workbook);
         File file = new File("C:\\Users\\13294\\Desktop\\yto\\swagger\\template.xls");
-        sheets.write(new FileOutputStream(file));
-        sheets.close();
+        workbook2.write(new FileOutputStream(file));
+        workbook2.close();
     }
 
     @Test

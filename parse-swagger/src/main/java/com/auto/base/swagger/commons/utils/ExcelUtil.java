@@ -1,5 +1,6 @@
 package com.auto.base.swagger.commons.utils;
 
+import com.auto.base.swagger.generate.ExcelConstant;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -272,6 +273,11 @@ public class ExcelUtil {
         // style.setBorderRight(CellStyle.BORDER_THIN);
         // style.setBorderBottom(CellStyle.BORDER_THIN);
         // style.setBorderLeft(CellStyle.BORDER_THIN);
+
+        //设置列宽
+        for (int i = 0; i < 100; i++) {
+            workbook.getSheetAt(ExcelConstant.SHEET_INDEX).setColumnWidth(i, 255 * 40);
+        }
 
         Font font = workbook.createFont();// 文字样式
 

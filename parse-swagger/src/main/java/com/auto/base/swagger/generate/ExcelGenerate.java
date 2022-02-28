@@ -11,5 +11,5 @@ public interface ExcelGenerate {
 
     public Workbook GenerateMata(ExcelMata mata);
 
-    public Workbook GenerateSheet();
+    public Workbook GenerateSheet(Workbook workbook);
 }
