@@ -234,6 +234,7 @@ public class Swagger2Parser extends SwaggerAbstractParser {
     }
 
     private String getBodyType(Operation operation) {
+        //todo 没有consumes时 默认body为json感觉会有问题
         if (CollectionUtils.isEmpty(operation.getConsumes())) {
             return Body.JSON;
         }

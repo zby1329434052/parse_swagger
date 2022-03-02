@@ -21,6 +21,10 @@ class XlsGenerateTest {
         swaggerMata.setSwaggerLabel("a");
         swaggerMata.setSwaggerJsonUrl("/swagger/api.json");
         swaggerMata.setBaseUrl("http://camel.dev.yoohoor.com:82");
+
+        List<String> headerList = new ArrayList<>();
+        headerList.add("authorizaTion");
+        swaggerMata.setSwaggerHeader(headerList);
         List<Pair<String, String>> dbList = new ArrayList<>();
         Pair<String, String> pair = new Pair<>("test", "camel,tender,oms,yto_trans");
         dbList.add(pair);
@@ -94,7 +98,8 @@ class XlsGenerateTest {
         XlsGenerate xlsGenerate = new XlsGenerate();
         Workbook workbook = xlsGenerate.GenerateMata(excelMata);
         Workbook workbook2 = xlsGenerate.GenerateSheet(workbook);
-        File file = new File("C:\\Users\\13294\\Desktop\\yto\\swagger\\template.xls");
+//        File file = new File("C:\\Users\\13294\\Desktop\\yto\\swagger\\template.xls");
+        File file = new File("D:\\outtest\\a\\template.xls");
         workbook2.write(new FileOutputStream(file));
         workbook2.close();
     }

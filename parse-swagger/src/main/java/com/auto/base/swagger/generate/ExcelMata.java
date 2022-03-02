@@ -15,6 +15,9 @@ import java.util.List;
 @Data
 public class ExcelMata {
 
+    /**
+     * swagger配置
+     */
     @NotNull
     private List<SwaggerMata> swaggerMata;
 
@@ -59,6 +62,11 @@ public class ExcelMata {
          */
         @NotNull
         private List<Pair<String, String>> dbList;
+
+        /**
+         * swagger文档会含有多个header 这里设置需要打印哪些header
+         */
+        private List<String> swaggerHeader;
     }
 
     @Data

@@ -20,11 +20,13 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.util.StringUtils;
 
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * xls模板类
@@ -34,11 +36,24 @@ import java.util.Map;
 @Slf4j
 public class XlsGenerate extends XlsExcel implements ExcelGenerate {
     /**
-     * 用力页 行数索引
+     * 用例页 行数索引
      */
-    private int sheetIndex = 0;
+    private int sheetRowIndex = 0;
 
+    /**
+     * 用例页索引 swaggerHeaderMap 和 判断是第几个用例页
+     */
+    private int sheetIndex = 1;
+
+    /**
+     * swagger标签列表
+     */
     private List<String> swaggerLabel = new ArrayList<>();
+
+    /**
+     * swagger请求头map k:sheetIndex, v:headerList
+     */
+    private Map<Integer, List<String>> swaggerHeaderMap = new HashMap<>();
 
     @Override
     public Workbook GenerateMata(ExcelMata mata) {
@@ -122,8 +137,17 @@ public class XlsGenerate extends XlsExcel implements ExcelGenerate {
             e.printStackTrace();
         }
 
-
+        prepareGenerateSheet(mata);
         return workbook;
+    }
+
+    private void prepareGenerateSheet(ExcelMata mata) {
+        @NotNull List<ExcelMata.SwaggerMata> swaggerMataList = mata.getSwaggerMata();
+        for (int i = 0; i < swaggerMataList.size(); i++) {
+            if (null != swaggerMataList.get(i).getSwaggerHeader()) {
+                swaggerHeaderMap.put(i + 1, swaggerMataList.get(i).getSwaggerHeader());
+            }
+        }
     }
 
     @Override
@@ -172,22 +196,22 @@ public class XlsGenerate extends XlsExcel implements ExcelGenerate {
             List<ApiDefinitionWithBLOBs> apiList = apiMap.get(tag.getName());
             doGenerateGroup(tag.getName(), apiList, excelUtil);
         }
-
+        sheetIndex++;
     }
 
     private void doGenerateGroup(String tag, List<ApiDefinitionWithBLOBs> apiList, ExcelUtil excelUtil) throws IOException {
         MsHTTPSamplerProxy proxy;
         Map<String, String> returnMap;
-        excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetIndex);
-        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex, 0);
-        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex, 0, ">>>");
-        sheetIndex += 1;
-        excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetIndex);
-        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex, 0);
-        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex, 0, "***");
-        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex, 1);
-        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex, 1, tag);
-        sheetIndex += 2;
+        excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetRowIndex);
+        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0);
+        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0, ">>>");
+        sheetRowIndex += 1;
+        excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetRowIndex);
+        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0);
+        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0, "***");
+        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex, 1);
+        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex, 1, tag);
+        sheetRowIndex += 2;
 
         for (ApiDefinitionWithBLOBs apiDefinition : apiList) {
             proxy = JSON.parseObject(apiDefinition.getRequest(), MsHTTPSamplerProxy.class);
@@ -195,37 +219,50 @@ public class XlsGenerate extends XlsExcel implements ExcelGenerate {
             doGenerateApi(proxy, returnMap, excelUtil);
         }
 
-        sheetIndex += 1;
-        excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetIndex);
-        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex, 0);
-        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex, 0, "***");
-        sheetIndex += 1;
-        excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetIndex);
-        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex, 0);
-        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex, 0, ">>>");
-        sheetIndex += 1;
+        sheetRowIndex += 1;
+        excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetRowIndex);
+        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0);
+        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0, "***");
+        sheetRowIndex += 1;
+        excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetRowIndex);
+        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0);
+        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0, ">>>");
+        sheetRowIndex += 1;
     }
 
     private void doGenerateApi(MsHTTPSamplerProxy proxy, Map<String, String> returnMap, ExcelUtil excelUtil) throws IOException {
-        excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetIndex);
-        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex, 0);
-        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex, 0, "**");
-        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex, 1);
-        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex, 1, proxy.getName());
+        excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetRowIndex);
+        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0);
+        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0, "**");
+        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex, 1);
+        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex, 1, proxy.getName());
 
-        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex, 2);
-        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex, 2, buildUseCaseApi(proxy));
+        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex, 2);
+        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex, 2, buildUseCaseApi(proxy));
 
-        excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetIndex + 1);
-        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex + 1, 0);
-        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex + 1, 0, "*");
+        excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1);
+        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, 0);
+        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, 0, "*");
         int columnIndex = 3;
-        columnIndex = buildApiParam(proxy.getHeaders(), excelUtil, columnIndex);
+        columnIndex = buildApiParam(filterHeader(proxy.getHeaders()), excelUtil, columnIndex);
         columnIndex = buildApiParam(proxy.getArguments(), excelUtil, columnIndex);
         columnIndex = buildApiParam(proxy.getBody(), excelUtil, columnIndex);
         buildApiParam(returnMap, excelUtil, columnIndex);
-        sheetIndex += 1;
+        sheetRowIndex += 1;
         doGenerateUseCase(excelUtil);
+    }
+
+    private Object filterHeader(List<KeyValue> headers) {
+        List<KeyValue> result = headers.stream().filter(header -> {
+            List<String> headerList = swaggerHeaderMap.get(sheetIndex);
+            if (headerList != null) {
+                for (String item : headerList) {
+                    return item.toLowerCase().equals(header.getName().toLowerCase());
+                }
+            }
+            return true;
+        }).collect(Collectors.toList());
+        return result;
     }
 
     private int buildApiParam(Object param, ExcelUtil excelUtil, int columnIndex) throws IOException {
@@ -233,30 +270,30 @@ public class XlsGenerate extends XlsExcel implements ExcelGenerate {
             List<KeyValue> paramList = (List)param;
             if (paramList != null && paramList.size() > 0) {
                 for (KeyValue item : paramList) {
-                    excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex, columnIndex);
-                    excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex, columnIndex, item.getName());
-                    excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex + 1, columnIndex);
-                    excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex + 1, columnIndex, item.getValue());
+                    excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex, columnIndex);
+                    excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex, columnIndex, item.getDescription());
+                    excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex);
+                    excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex, item.getName());
                     columnIndex += 1;
                 }
             }
         } else if (param instanceof Body) {
             Body body = (Body) param;
             for (KeyValue item : body.getKvs()) {
-                excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex, columnIndex);
-                excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex, columnIndex, item.getName());
-                excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex + 1, columnIndex);
-                excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex + 1, columnIndex, item.getValue());
+                excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex, columnIndex);
+                excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex, columnIndex, item.getDescription());
+                excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex);
+                excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex, item.getName());
                 columnIndex += 1;
             }
         } else {
-            excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex + 1, columnIndex - 1);
-            excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex + 1, columnIndex - 1, "||");
+            excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex - 1);
+            excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex - 1, "||");
             Map<String, String> returnMap = (Map) param;
             for (Map.Entry<String, String> entry : returnMap.entrySet()) {
                 String k = entry.getKey();
-                excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetIndex + 1, columnIndex);
-                excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetIndex + 1, columnIndex, k);
+                excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex);
+                excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex, k);
                 columnIndex += 1;
             }
         }
@@ -276,6 +313,6 @@ public class XlsGenerate extends XlsExcel implements ExcelGenerate {
     }
 
     private void doGenerateUseCase(ExcelUtil excelUtil) {
-        sheetIndex += 2;
+        sheetRowIndex += 2;
     }
 }
