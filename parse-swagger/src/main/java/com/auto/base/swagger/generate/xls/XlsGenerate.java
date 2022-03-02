@@ -1,6 +1,8 @@
 package com.auto.base.swagger.generate.xls;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.auto.base.swagger.commons.utils.ExcelUtil;
 import com.auto.base.swagger.commons.utils.MataUtil;
 import com.auto.base.swagger.domain.ApiDefinitionWithBLOBs;
@@ -18,6 +20,7 @@ import com.auto.base.swagger.request.MsHTTPSamplerProxy;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import javax.validation.constraints.NotNull;
@@ -26,6 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -201,7 +205,7 @@ public class XlsGenerate extends XlsExcel implements ExcelGenerate {
 
     private void doGenerateGroup(String tag, List<ApiDefinitionWithBLOBs> apiList, ExcelUtil excelUtil) throws IOException {
         MsHTTPSamplerProxy proxy;
-        Map<String, String> returnMap;
+        Map<String, JSONObject> returnMap;
         excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetRowIndex);
         excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0);
         excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0, ">>>");
@@ -230,7 +234,7 @@ public class XlsGenerate extends XlsExcel implements ExcelGenerate {
         sheetRowIndex += 1;
     }
 
-    private void doGenerateApi(MsHTTPSamplerProxy proxy, Map<String, String> returnMap, ExcelUtil excelUtil) throws IOException {
+    private void doGenerateApi(MsHTTPSamplerProxy proxy, Map<String, JSONObject> returnMap, ExcelUtil excelUtil) throws IOException {
         excelUtil.createRow(ExcelConstant.SHEET_INDEX, sheetRowIndex);
         excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0);
         excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex, 0, "**");
@@ -257,7 +261,7 @@ public class XlsGenerate extends XlsExcel implements ExcelGenerate {
             List<String> headerList = swaggerHeaderMap.get(sheetIndex);
             if (headerList != null) {
                 for (String item : headerList) {
-                    return item.toLowerCase().equals(header.getName().toLowerCase());
+                    return item.equalsIgnoreCase(header.getName());
                 }
             }
             return true;
@@ -289,15 +293,78 @@ public class XlsGenerate extends XlsExcel implements ExcelGenerate {
         } else {
             excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex - 1);
             excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex - 1, "||");
-            Map<String, String> returnMap = (Map) param;
-            for (Map.Entry<String, String> entry : returnMap.entrySet()) {
-                String k = entry.getKey();
-                excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex);
-                excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex, k);
-                columnIndex += 1;
+            Map<String, JSONObject> returnMap = (Map) param;
+            JSONObject raw = returnMap.get("body").getJSONObject("raw");
+            if (raw != null) {
+                for (Map.Entry<String, Object> entry : raw.getInnerMap().entrySet()) {
+                    if (entry.getKey().equals("data")) {
+                        dealWithData(entry.getValue(), columnIndex, excelUtil);
+                    } else {
+                        excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex);
+                        excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex, entry.getKey());
+                        columnIndex += 1;
+                    }
+                }
             }
         }
         return columnIndex;
+    }
+
+    private void dealWithData(Object data, int columnIndex, ExcelUtil excelUtil) throws IOException {
+        //List 存参数  最后统一替换
+        List<String> dataList = new ArrayList<>();
+        //递归处理  JSONObject list
+        if (data instanceof String || (!(data instanceof JSONArray) && ((JSONObject)data).isEmpty())) {
+            dataList.add("data");
+        } else {
+            parseResponseData("data", data, dataList);
+        }
+        if (!CollectionUtils.isEmpty(dataList)) {
+            for (String item : dataList) {
+                excelUtil.createCell(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex);
+                excelUtil.setValueAt(ExcelConstant.SHEET_INDEX, sheetRowIndex + 1, columnIndex, item);
+                columnIndex += 1;
+            }
+        }
+    }
+
+    private void parseResponseData(String prefix, Object data, List<String> dataList) {
+        //递归出口
+        if (Objects.isNull(data)) {
+            return;
+        } else if (data instanceof JSONArray) {
+            String addFix = "[-]";
+            addFix = prefix + addFix;
+            for (Object item : ((JSONArray) data)) {
+                if (item instanceof Map) {
+                    dataList.add(addFix + "." + ((Map)item).get("key"));
+                } else {
+                    parseResponseData(prefix + addFix, item, dataList);
+                }
+            }
+        } else if (data instanceof JSONObject) {
+            String addFix = ".";
+            for (Map.Entry<String, Object> entry : ((JSONObject) data).entrySet()) {
+                addFix += entry.getKey();
+                if (entry.getValue() instanceof Map) {
+                    dataList.add(addFix + "." + ((Map)entry.getValue()).get("key"));
+                } else {
+                    parseResponseData(prefix + addFix, entry.getValue(), dataList);
+                }
+            }
+        } else {
+            if (data instanceof Integer) {
+                dataList.add(prefix + "." + data);
+            } else if (data instanceof String) {
+                dataList.add(prefix + "." + data);
+            } else {
+                if (data instanceof Map) {
+                    dataList.add(prefix + "." + ((Map)data).get("key"));
+                } else {
+                    dataList.add(prefix + "." + data);
+                }
+            }
+        }
     }
 
     private String buildUseCaseApi(MsHTTPSamplerProxy proxy) {
